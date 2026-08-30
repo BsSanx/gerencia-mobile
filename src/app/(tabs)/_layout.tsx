@@ -15,6 +15,12 @@ export default function TabsLayout() {
           title: "Início",
         }}
       />
+      <Tabs.Screen
+        name="meus-eventos"
+        options={{
+          title: "Meus Eventos",
+        }}
+      />
     </Tabs>
   );
 }
