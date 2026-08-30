@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "nome": "Summit de Tecnologia 2025",
+    "categoria": "Tecnologia",
+    "tipoEvento": "publico",
+    "dataInicio": "2026-09-15",
+    "dataFim": "2026-09-16",
+    "horario": "09:00",
+    "local": "Expo Center Norte, São Paulo, SP",
+    "capacidade": 200,
+    "inscritos": 155,
+    "codigo": "TECH-2026-A1B2",
+    "descricao": "O maior evento de tecnologia do Brasil, com dois dias de palestras, workshops e networking sobre IA, Cloud e Cibersegurança.",
+    "status": "ativo",
+    "valor": 299
+  },
+  {
+    "id": "2",
+    "nome": "Workshop de UX Design",
+    "categoria": "Design",
+    "tipoEvento": "publico",
+    "dataInicio": "2026-09-22",
+    "dataFim": "2026-09-22",
+    "horario": "14:00",
+    "local": "Online (Zoom)",
+    "capacidade": 80,
+    "inscritos": 80,
+    "codigo": "UX-2026-C3D4",
+    "descricao": "Workshop prático de UX Design, cobrindo pesquisa, wireframes e prototipação.",
+    "status": "ativo",
+    "valor": 149
+  },
+  {
+    "id": "3",
+    "nome": "Conferência de Marketing Digital",
+    "categoria": "Marketing",
+    "tipoEvento": "publico",
+    "dataInicio": "2026-08-30",
+    "dataFim": "2026-08-30",
+    "horario": "08:30",
+    "local": "Centro de Convenções, Rio de Janeiro, RJ",
+    "capacidade": 300,
+    "inscritos": 12,
+    "codigo": "MKT-2026-E5F6",
+    "descricao": "Conferência gratuita reunindo especialistas em marketing digital e redes sociais.",
+    "status": "ativo",
+    "valor": 0
+  }
+]
