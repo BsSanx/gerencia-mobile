@@ -1,7 +1,10 @@
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 import eventos from "../data/eventos.json";
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Descubra novos eventos</Text>
@@ -10,7 +13,10 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <Pressable
+            style={styles.card}
+            onPress={() => router.push({ pathname: "/evento/[id]", params: { id: item.id } })}
+          >
             <Text style={styles.categoria}>{item.categoria}</Text>
             <Text style={styles.nome}>{item.nome}</Text>
             <Text style={styles.local}>{item.local}</Text>
@@ -20,7 +26,7 @@ export default function HomeScreen() {
             <Text style={styles.vagas}>
               {item.inscritos}/{item.capacidade} inscritos
             </Text>
-          </View>
+          </Pressable>
         )}
       />
     </View>
