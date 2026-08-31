@@ -2,7 +2,8 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../services/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../services/firebase";
 
 function mensagemDeErro(codigo: string) {
   switch (codigo) {
@@ -34,8 +35,10 @@ export default function LoginScreen() {
     }
     setCarregando(true);
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), senha);
-      router.replace("/(tabs)");
+      const credencial = await signInWithEmailAndPassword(auth, email.trim(), senha);
+      const perfilSnap = await getDoc(doc(db, "usuarios", credencial.user.uid));
+      const tipo = perfilSnap.exists() ? perfilSnap.data().tipo : "cliente";
+      router.replace(tipo === "organizador" ? "/organizador" : "/(tabs)");
     } catch (e: any) {
       setErro(mensagemDeErro(e.code));
     } finally {

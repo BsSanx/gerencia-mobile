@@ -1,18 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { updateProfile, signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { useAuth } from "../context/AuthContext";
 
-export default function PerfilScreen() {
-  const { user } = useAuth();
+const LABELS_TIPO: Record<string, string> = {
+  cliente: "Cliente",
+  organizador: "Organizador",
+  admin: "Admin",
+};
+
+type Props = {
+  esconderLinkOrganizador?: boolean;
+};
+
+export default function PerfilScreen({ esconderLinkOrganizador = false }: Props) {
+  const { user, perfil } = useAuth();
   const router = useRouter();
 
   const [nome, setNome] = useState(user?.displayName ?? "");
   const [telefone, setTelefone] = useState("");
   const [bio, setBio] = useState("");
   const [salvando, setSalvando] = useState(false);
+
+  useEffect(() => {
+    if (user?.displayName) setNome(user.displayName);
+  }, [user?.displayName]);
 
   async function handleSalvar() {
     if (!auth.currentUser) return;
@@ -49,6 +63,7 @@ export default function PerfilScreen() {
           </Text>
         </View>
         <Text style={styles.avatarNome}>{nome || "Sem nome definido"}</Text>
+        {!!perfil && <Text style={styles.badgeTipo}>{LABELS_TIPO[perfil.tipo]}</Text>}
       </View>
 
       <Text style={styles.label}>Nome completo</Text>
@@ -74,9 +89,11 @@ export default function PerfilScreen() {
         <Text style={styles.botaoTexto}>{salvando ? "Salvando..." : "Salvar alterações"}</Text>
       </Pressable>
 
-      <Link href="/organizador" style={styles.linkOrganizador}>
-        Acessar painel do Organizador (demo)
-      </Link>
+      {perfil?.tipo === "organizador" && !esconderLinkOrganizador && (
+        <Link href="/organizador" style={styles.linkOrganizador}>
+          Acessar painel do Organizador
+        </Link>
+      )}
 
       <Link href="/admin" style={styles.linkAdmin}>
         Acessar painel do Admin (demo)
@@ -97,6 +114,7 @@ const styles = StyleSheet.create({
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#dbeafe", alignItems: "center", justifyContent: "center", marginBottom: 8 },
   avatarTexto: { color: "#2563eb", fontWeight: "bold", fontSize: 20 },
   avatarNome: { fontWeight: "600", fontSize: 15 },
+  badgeTipo: { fontSize: 11, fontWeight: "700", color: "#7c3aed", backgroundColor: "#f5f3ff", borderRadius: 6, paddingVertical: 3, paddingHorizontal: 8, marginTop: 6 },
   label: { fontSize: 13, fontWeight: "600", marginBottom: 6, marginTop: 12 },
   input: { borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 10, padding: 12, fontSize: 15 },
   inputDesabilitado: { backgroundColor: "#f9fafb", color: "#6b7280" },

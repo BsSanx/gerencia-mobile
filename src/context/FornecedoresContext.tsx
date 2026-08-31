@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { useAuth } from "./AuthContext";
 
 export type Fornecedor = {
   id: string;
@@ -7,9 +8,10 @@ export type Fornecedor = {
   telefone: string;
   categoria: string;
   responsavel: string;
+  organizadorId?: string;
 };
 
-type NovoFornecedor = Omit<Fornecedor, "id">;
+type NovoFornecedor = Omit<Fornecedor, "id" | "organizadorId">;
 
 type FornecedoresContextType = {
   fornecedores: Fornecedor[];
@@ -18,40 +20,16 @@ type FornecedoresContextType = {
 
 const FornecedoresContext = createContext<FornecedoresContextType | undefined>(undefined);
 
-const FORNECEDORES_INICIAIS: Fornecedor[] = [
-  {
-    id: "1",
-    nome: "SoundPro Audiovisual",
-    cnpj: "12.345.678/0001-90",
-    telefone: "(11) 99888-7766",
-    categoria: "Audiovisual",
-    responsavel: "João Carlos",
-  },
-  {
-    id: "2",
-    nome: "Gourmet Express Buffet",
-    cnpj: "98.765.432/0001-10",
-    telefone: "(11) 98765-4321",
-    categoria: "Buffet",
-    responsavel: "Marina Souza",
-  },
-  {
-    id: "3",
-    nome: "PhotoClick Eventos",
-    cnpj: "55.444.333/0001-22",
-    telefone: "(11) 97654-3210",
-    categoria: "Fotografia",
-    responsavel: "André Souza",
-  },
-];
-
 export function FornecedoresProvider({ children }: { children: ReactNode }) {
-  const [fornecedores, setFornecedores] = useState<Fornecedor[]>(FORNECEDORES_INICIAIS);
+  const { user } = useAuth();
+  const [todosFornecedores, setTodosFornecedores] = useState<Fornecedor[]>([]);
 
   function cadastrarFornecedor(dados: NovoFornecedor) {
-    const novo: Fornecedor = { ...dados, id: Date.now().toString() };
-    setFornecedores((prev) => [novo, ...prev]);
+    const novo: Fornecedor = { ...dados, id: Date.now().toString(), organizadorId: user?.uid };
+    setTodosFornecedores((prev) => [novo, ...prev]);
   }
+
+  const fornecedores = todosFornecedores.filter((f) => f.organizadorId === user?.uid);
 
   return (
     <FornecedoresContext.Provider value={{ fornecedores, cadastrarFornecedor }}>

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { collection, onSnapshot, addDoc, getDocs, query } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { useAuth } from "./AuthContext";
 import eventosIniciais from "../data/eventos.json";
 
 export type Evento = {
@@ -18,9 +19,10 @@ export type Evento = {
   descricao: string;
   status: string;
   valor: number;
+  organizadorId?: string;
 };
 
-type NovoEvento = Omit<Evento, "id" | "inscritos" | "codigo" | "status">;
+type NovoEvento = Omit<Evento, "id" | "inscritos" | "codigo" | "status" | "organizadorId">;
 
 type EventosContextType = {
   eventos: Evento[];
@@ -31,6 +33,7 @@ type EventosContextType = {
 const EventosContext = createContext<EventosContextType | undefined>(undefined);
 
 export function EventosProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [carregando, setCarregando] = useState(true);
 
@@ -65,6 +68,7 @@ export function EventosProvider({ children }: { children: ReactNode }) {
       inscritos: 0,
       codigo: `EVT-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       status: "ativo",
+      organizadorId: user?.uid ?? null,
     });
   }
 

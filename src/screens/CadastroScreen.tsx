@@ -2,7 +2,8 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../services/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../services/firebase";
 
 function mensagemDeErro(codigo: string) {
   switch (codigo) {
@@ -38,7 +39,15 @@ export default function CadastroScreen() {
     try {
       const credencial = await createUserWithEmailAndPassword(auth, email.trim(), senha);
       await updateProfile(credencial.user, { displayName: nome.trim() });
-      router.replace("/(tabs)");
+
+      await setDoc(doc(db, "usuarios", credencial.user.uid), {
+        nome: nome.trim(),
+        email: email.trim(),
+        tipo: tipoConta,
+        criadoEm: new Date().toISOString(),
+      });
+
+      router.replace(tipoConta === "organizador" ? "/organizador" : "/(tabs)");
     } catch (e: any) {
       setErro(mensagemDeErro(e.code));
     } finally {

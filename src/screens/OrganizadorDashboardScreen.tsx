@@ -1,14 +1,17 @@
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useEventos } from "../context/EventosContext";
+import { useAuth } from "../context/AuthContext";
 import OrganizadorNav from "../components/OrganizadorNav";
 
 export default function OrganizadorDashboardScreen() {
   const router = useRouter();
   const { eventos } = useEventos();
+  const { user } = useAuth();
 
-  const totalInscritos = eventos.reduce((soma, e) => soma + e.inscritos, 0);
-  const eventosAtivos = eventos.filter((e) => e.status === "ativo").length;
+  const meusEventos = eventos.filter((e) => e.organizadorId === user?.uid);
+  const totalInscritos = meusEventos.reduce((soma, e) => soma + e.inscritos, 0);
+  const eventosAtivos = meusEventos.filter((e) => e.status === "ativo").length;
 
   return (
     <View style={styles.container}>
@@ -39,22 +42,26 @@ export default function OrganizadorDashboardScreen() {
         </Pressable>
       </View>
 
-      <FlatList
-        data={eventos}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.lista}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.nome}>{item.nome}</Text>
-            <Text style={styles.detalhe}>
-              {item.dataInicio} · {item.local}
-            </Text>
-            <Text style={styles.ocupacao}>
-              {item.inscritos}/{item.capacidade} inscritos
-            </Text>
-          </View>
-        )}
-      />
+      {meusEventos.length === 0 ? (
+        <Text style={styles.vazioTexto}>Você ainda não criou nenhum evento.</Text>
+      ) : (
+        <FlatList
+          data={meusEventos}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.lista}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.nome}>{item.nome}</Text>
+              <Text style={styles.detalhe}>
+                {item.dataInicio} · {item.local}
+              </Text>
+              <Text style={styles.ocupacao}>
+                {item.inscritos}/{item.capacidade} inscritos
+              </Text>
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 }
@@ -73,6 +80,7 @@ const styles = StyleSheet.create({
   secaoTitulo: { fontSize: 16, fontWeight: "bold" },
   botaoCriar: { backgroundColor: "#7c3aed", borderRadius: 8, paddingVertical: 8, paddingHorizontal: 12 },
   botaoCriarTexto: { color: "#fff", fontWeight: "600", fontSize: 13 },
+  vazioTexto: { color: "#6b7280", fontSize: 14 },
   lista: { gap: 10, paddingBottom: 24 },
   card: { borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 10, padding: 12 },
   nome: { fontWeight: "bold", fontSize: 15, marginBottom: 2 },
