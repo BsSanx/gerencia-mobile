@@ -9,6 +9,7 @@ export type Inscricao = {
   status: StatusInscricao;
   dataInscricao: string;
   posicaoFila?: number;
+  checkin?: string;
 };
 
 type InscricoesContextType = {
@@ -17,9 +18,19 @@ type InscricoesContextType = {
   cancelar: (inscricaoId: string) => void;
   getInscricaoDoEvento: (eventoId: string) => Inscricao | undefined;
   getVagasOcupadas: (eventoId: string) => number;
+  fazerCheckin: (inscricaoId: string) => boolean;
+  podeFazerCheckin: (eventoId: string) => boolean;
 };
 
 const InscricoesContext = createContext<InscricoesContextType | undefined>(undefined);
+
+function estaNoPeriodoDoEvento(dataInicio: string, dataFim: string) {
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const inicio = new Date(dataInicio + "T00:00:00");
+  const fim = new Date(dataFim + "T23:59:59");
+  return hoje >= inicio && hoje <= fim;
+}
 
 export function InscricoesProvider({ children }: { children: ReactNode }) {
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
@@ -86,8 +97,35 @@ export function InscricoesProvider({ children }: { children: ReactNode }) {
     return inscricoes.find((i) => i.eventoId === eventoId && i.status !== "cancelada");
   }
 
+  function podeFazerCheckin(eventoId: string) {
+    const evento = eventosData.find((e) => e.id === eventoId);
+    if (!evento) return false;
+    return estaNoPeriodoDoEvento(evento.dataInicio, evento.dataFim);
+  }
+
+  function fazerCheckin(inscricaoId: string): boolean {
+    const alvo = inscricoes.find((i) => i.id === inscricaoId);
+    if (!alvo || alvo.status !== "confirmada" || alvo.checkin) return false;
+    if (!podeFazerCheckin(alvo.eventoId)) return false;
+
+    setInscricoes((prev) =>
+      prev.map((i) => (i.id === inscricaoId ? { ...i, checkin: new Date().toISOString() } : i))
+    );
+    return true;
+  }
+
   return (
-    <InscricoesContext.Provider value={{ inscricoes, inscrever, cancelar, getInscricaoDoEvento, getVagasOcupadas }}>
+    <InscricoesContext.Provider
+      value={{
+        inscricoes,
+        inscrever,
+        cancelar,
+        getInscricaoDoEvento,
+        getVagasOcupadas,
+        fazerCheckin,
+        podeFazerCheckin,
+      }}
+    >
       {children}
     </InscricoesContext.Provider>
   );

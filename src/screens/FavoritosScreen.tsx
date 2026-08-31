@@ -1,17 +1,28 @@
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import eventos from "../data/eventos.json";
+import eventosData from "../data/eventos.json";
 import { useFavoritos } from "../context/FavoritosContext";
 
-export default function HomeScreen() {
+export default function FavoritosScreen() {
+  const { favoritos, alternarFavorito } = useFavoritos();
   const router = useRouter();
-  const { ehFavorito, alternarFavorito } = useFavoritos();
+
+  const eventosFavoritos = eventosData.filter((e) => favoritos.includes(e.id));
+
+  if (eventosFavoritos.length === 0) {
+    return (
+      <View style={styles.vazioContainer}>
+        <Text style={styles.vazioTitulo}>Nenhum favorito ainda</Text>
+        <Text style={styles.vazioTexto}>Toque no coração de um evento na Início para salvá-lo aqui.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Descubra novos eventos</Text>
+      <Text style={styles.titulo}>Meus Favoritos</Text>
       <FlatList
-        data={eventos}
+        data={eventosFavoritos}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
         renderItem={({ item }) => (
@@ -22,16 +33,13 @@ export default function HomeScreen() {
             <View style={styles.cardTopo}>
               <Text style={styles.categoria}>{item.categoria}</Text>
               <Pressable onPress={() => alternarFavorito(item.id)} hitSlop={8}>
-                <Text style={styles.coracao}>{ehFavorito(item.id) ? "♥" : "♡"}</Text>
+                <Text style={styles.coracao}>♥</Text>
               </Pressable>
             </View>
             <Text style={styles.nome}>{item.nome}</Text>
             <Text style={styles.local}>{item.local}</Text>
             <Text style={styles.data}>
               {item.dataInicio} · {item.horario}
-            </Text>
-            <Text style={styles.vagas}>
-              {item.inscritos}/{item.capacidade} inscritos
             </Text>
           </Pressable>
         )}
@@ -50,6 +58,8 @@ const styles = StyleSheet.create({
   coracao: { color: "#dc2626", fontSize: 18 },
   nome: { fontSize: 16, fontWeight: "bold", marginTop: 4, marginBottom: 2 },
   local: { color: "#6b7280", marginBottom: 2 },
-  data: { color: "#6b7280", marginBottom: 4 },
-  vagas: { fontSize: 13, color: "#111827" },
+  data: { color: "#6b7280" },
+  vazioContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 40, backgroundColor: "#fff" },
+  vazioTitulo: { fontSize: 17, fontWeight: "bold", marginBottom: 6 },
+  vazioTexto: { color: "#6b7280", textAlign: "center" },
 });

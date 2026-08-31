@@ -1,10 +1,13 @@
 import { Stack } from "expo-router";
 import { InscricoesProvider } from "../context/InscricoesContext";
+import { FavoritosProvider } from "../context/FavoritosContext";
 
 export default function RootLayout() {
   return (
     <InscricoesProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <FavoritosProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </FavoritosProvider>
     </InscricoesProvider>
   );
 }
