@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import eventos from "../data/eventos.json";
+import { useEventos } from "../context/EventosContext";
 
 export default function OrganizadorDashboardScreen() {
   const router = useRouter();
+  const { eventos } = useEventos();
 
   const totalInscritos = eventos.reduce((soma, e) => soma + e.inscritos, 0);
   const eventosAtivos = eventos.filter((e) => e.status === "ativo").length;
