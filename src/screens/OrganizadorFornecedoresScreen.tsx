@@ -27,7 +27,12 @@ export default function OrganizadorFornecedoresScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <Pressable
+            style={styles.card}
+            onPress={() =>
+              router.push({ pathname: "/organizador/fornecedores/[id]", params: { id: item.id } })
+            }
+          >
             <View style={styles.cardTopo}>
               <Text style={styles.nome}>{item.nome}</Text>
               <Text style={styles.categoria}>{item.categoria}</Text>
@@ -36,7 +41,7 @@ export default function OrganizadorFornecedoresScreen() {
             <Text style={styles.detalhe}>
               {item.telefone} · {item.responsavel}
             </Text>
-          </View>
+          </Pressable>
         )}
       />
     </View>
