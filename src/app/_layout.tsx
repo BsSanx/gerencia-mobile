@@ -4,6 +4,7 @@ import { InscricoesProvider } from "../context/InscricoesContext";
 import { FavoritosProvider } from "../context/FavoritosContext";
 import { FornecedoresProvider } from "../context/FornecedoresContext";
 import { ContratosProvider } from "../context/ContratosContext";
+import { UsuariosProvider } from "../context/UsuariosContext";
 
 export default function RootLayout() {
   return (
@@ -12,7 +13,9 @@ export default function RootLayout() {
         <FavoritosProvider>
           <FornecedoresProvider>
             <ContratosProvider>
-              <Stack screenOptions={{ headerShown: false }} />
+              <UsuariosProvider>
+                <Stack screenOptions={{ headerShown: false }} />
+              </UsuariosProvider>
             </ContratosProvider>
           </FornecedoresProvider>
         </FavoritosProvider>

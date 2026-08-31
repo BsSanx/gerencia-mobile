@@ -9,7 +9,6 @@ export default function PerfilScreen() {
   const [bio, setBio] = useState("Apaixonada por tecnologia e eventos de inovação.");
 
   function handleSalvar() {
-    // Ainda sem backend — por enquanto só confirma visualmente que "salvou"
     Alert.alert("Perfil atualizado", "Suas informações foram salvas.");
   }
 
@@ -62,6 +61,10 @@ export default function PerfilScreen() {
       <Link href="/organizador" style={styles.linkOrganizador}>
         Acessar painel do Organizador (demo)
       </Link>
+
+      <Link href="/admin" style={styles.linkAdmin}>
+        Acessar painel do Admin (demo)
+      </Link>
     </ScrollView>
   );
 }
@@ -80,4 +83,5 @@ const styles = StyleSheet.create({
   botao: { backgroundColor: "#2563eb", borderRadius: 10, padding: 14, alignItems: "center", marginTop: 24 },
   botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 15 },
   linkOrganizador: { textAlign: "center", marginTop: 24, color: "#7c3aed", fontWeight: "600" },
+  linkAdmin: { textAlign: "center", marginTop: 12, color: "#111827", fontWeight: "600" },
 });
