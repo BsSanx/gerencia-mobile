@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
+import { Link } from "expo-router";
 
 export default function PerfilScreen() {
   const [nome, setNome] = useState("Ana Paula Santos");
@@ -57,6 +58,10 @@ export default function PerfilScreen() {
       <Pressable style={styles.botao} onPress={handleSalvar}>
         <Text style={styles.botaoTexto}>Salvar alterações</Text>
       </Pressable>
+
+      <Link href="/organizador" style={styles.linkOrganizador}>
+        Acessar painel do Organizador (demo)
+      </Link>
     </ScrollView>
   );
 }
@@ -74,4 +79,5 @@ const styles = StyleSheet.create({
   inputMultilinha: { height: 80, textAlignVertical: "top" },
   botao: { backgroundColor: "#2563eb", borderRadius: 10, padding: 14, alignItems: "center", marginTop: 24 },
   botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 15 },
+  linkOrganizador: { textAlign: "center", marginTop: 24, color: "#7c3aed", fontWeight: "600" },
 });
