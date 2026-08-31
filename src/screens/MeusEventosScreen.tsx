@@ -2,6 +2,7 @@ import { View, Text, FlatList, StyleSheet, Pressable, Alert } from "react-native
 import { useRouter } from "expo-router";
 import { useEventos } from "../context/EventosContext";
 import { useInscricoes } from "../context/InscricoesContext";
+import { colors, shadow } from "../theme/colors";
 
 export default function MeusEventosScreen() {
   const { eventos } = useEventos();
@@ -37,14 +38,17 @@ export default function MeusEventosScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Meus Eventos</Text>
+      <View style={styles.header}>
+        <Text style={styles.titulo}>Meus Eventos</Text>
+        <Text style={styles.subtitulo}>Eventos em que você está inscrito ou na fila</Text>
+      </View>
       <FlatList
         data={ativas}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
         renderItem={({ item }) => (
           <Pressable
-            style={styles.card}
+            style={[styles.card, shadow]}
             onPress={() =>
               router.push({ pathname: "/evento/[id]", params: { id: item.evento!.id } })
             }
@@ -52,9 +56,13 @@ export default function MeusEventosScreen() {
             <View style={styles.cardTopo}>
               <Text style={styles.nome}>{item.evento!.nome}</Text>
               {item.status === "confirmada" ? (
-                <Text style={styles.badgeConfirmado}>Confirmada</Text>
+                <View style={[styles.badge, { backgroundColor: colors.greenLight }]}>
+                  <Text style={[styles.badgeTexto, { color: colors.green }]}>Confirmada</Text>
+                </View>
               ) : (
-                <Text style={styles.badgeFila}>Na fila (#{item.posicaoFila})</Text>
+                <View style={[styles.badge, { backgroundColor: colors.amberLight }]}>
+                  <Text style={[styles.badgeTexto, { color: colors.amber }]}>Na fila (#{item.posicaoFila})</Text>
+                </View>
               )}
             </View>
             <Text style={styles.local}>{item.evento!.local}</Text>
@@ -87,24 +95,26 @@ export default function MeusEventosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 60, paddingHorizontal: 16, backgroundColor: "#fff" },
-  titulo: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
-  lista: { gap: 12, paddingBottom: 24 },
-  card: { borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 12, padding: 14 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  header: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 12 },
+  titulo: { fontSize: 22, fontWeight: "bold", color: colors.textPrimary },
+  subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2 },
+  lista: { gap: 12, paddingHorizontal: 16, paddingBottom: 24 },
+  card: { backgroundColor: colors.card, borderRadius: 14, padding: 14 },
   cardTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
-  nome: { fontSize: 16, fontWeight: "bold", flexShrink: 1 },
-  badgeConfirmado: { color: "#16a34a", fontWeight: "700", fontSize: 12 },
-  badgeFila: { color: "#f59e0b", fontWeight: "700", fontSize: 12 },
-  local: { color: "#6b7280", marginBottom: 2 },
-  data: { color: "#6b7280", marginBottom: 10 },
+  nome: { fontSize: 16, fontWeight: "bold", flexShrink: 1, color: colors.textPrimary },
+  badge: { borderRadius: 6, paddingVertical: 3, paddingHorizontal: 8 },
+  badgeTexto: { fontWeight: "700", fontSize: 11 },
+  local: { color: colors.textSecondary, marginBottom: 2 },
+  data: { color: colors.textSecondary, marginBottom: 10 },
   acoesContainer: { marginBottom: 10 },
-  botaoCheckin: { backgroundColor: "#16a34a", borderRadius: 8, paddingVertical: 8, alignItems: "center" },
+  botaoCheckin: { backgroundColor: colors.green, borderRadius: 8, paddingVertical: 8, alignItems: "center" },
   botaoCheckinTexto: { color: "#fff", fontWeight: "700", fontSize: 13 },
-  checkinFeito: { color: "#16a34a", fontWeight: "700", fontSize: 13 },
-  checkinIndisponivel: { color: "#9ca3af", fontSize: 12, fontStyle: "italic" },
-  botaoCancelar: { alignSelf: "flex-start", borderWidth: 1, borderColor: "#dc2626", borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },
-  botaoCancelarTexto: { color: "#dc2626", fontWeight: "600", fontSize: 12 },
-  vazioContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 40, backgroundColor: "#fff" },
-  vazioTitulo: { fontSize: 17, fontWeight: "bold", marginBottom: 6 },
-  vazioTexto: { color: "#6b7280", textAlign: "center" },
+  checkinFeito: { color: colors.green, fontWeight: "700", fontSize: 13 },
+  checkinIndisponivel: { color: colors.textSecondary, fontSize: 12, fontStyle: "italic" },
+  botaoCancelar: { alignSelf: "flex-start", borderWidth: 1, borderColor: colors.red, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },
+  botaoCancelarTexto: { color: colors.red, fontWeight: "600", fontSize: 12 },
+  vazioContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 40, backgroundColor: colors.bg },
+  vazioTitulo: { fontSize: 17, fontWeight: "bold", marginBottom: 6, color: colors.textPrimary },
+  vazioTexto: { color: colors.textSecondary, textAlign: "center" },
 });

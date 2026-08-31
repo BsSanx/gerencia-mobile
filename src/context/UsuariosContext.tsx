@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { db } from "../services/firebase";
 
 export type TipoUsuario = "cliente" | "organizador" | "admin";
 
@@ -13,30 +15,44 @@ export type Usuario = {
 
 type UsuariosContextType = {
   usuarios: Usuario[];
+  carregando: boolean;
   alternarStatus: (id: string) => void;
 };
 
 const UsuariosContext = createContext<UsuariosContextType | undefined>(undefined);
 
-const USUARIOS_INICIAIS: Usuario[] = [
-  { id: "1", nome: "Ana Paula Santos", email: "ana@email.com", tipo: "cliente", ativo: true, criadoEm: "2026-01-10" },
-  { id: "2", nome: "Rafael Organizer", email: "rafael@techco.com.br", tipo: "organizador", ativo: true, criadoEm: "2026-01-15" },
-  { id: "3", nome: "Carlos Eduardo Lima", email: "carlos@email.com", tipo: "cliente", ativo: true, criadoEm: "2026-01-20" },
-  { id: "4", nome: "Maria Fernanda", email: "maria@eventos.com", tipo: "organizador", ativo: false, criadoEm: "2026-01-22" },
-  { id: "5", nome: "Admin Master", email: "admin@gerencia.com", tipo: "admin", ativo: true, criadoEm: "2026-01-01" },
-  { id: "6", nome: "Beatriz Oliveira", email: "beatriz@email.com", tipo: "cliente", ativo: true, criadoEm: "2026-01-25" },
-  { id: "7", nome: "Lucas Monteiro", email: "lucas@confhub.com", tipo: "organizador", ativo: true, criadoEm: "2026-01-28" },
-];
-
 export function UsuariosProvider({ children }: { children: ReactNode }) {
-  const [usuarios, setUsuarios] = useState<Usuario[]>(USUARIOS_INICIAIS);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
-  function alternarStatus(id: string) {
-    setUsuarios((prev) => prev.map((u) => (u.id === id ? { ...u, ativo: !u.ativo } : u)));
+  useEffect(() => {
+    const ref = collection(db, "usuarios");
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      const lista = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          nome: data.nome ?? "",
+          email: data.email ?? "",
+          tipo: data.tipo ?? "cliente",
+          ativo: data.ativo ?? true,
+          criadoEm: data.criadoEm ?? "",
+        } as Usuario;
+      });
+      setUsuarios(lista);
+      setCarregando(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  async function alternarStatus(id: string) {
+    const alvo = usuarios.find((u) => u.id === id);
+    if (!alvo) return;
+    await updateDoc(doc(db, "usuarios", id), { ativo: !alvo.ativo });
   }
 
   return (
-    <UsuariosContext.Provider value={{ usuarios, alternarStatus }}>
+    <UsuariosContext.Provider value={{ usuarios, carregando, alternarStatus }}>
       {children}
     </UsuariosContext.Provider>
   );
