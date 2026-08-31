@@ -1,13 +1,14 @@
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import eventosData from "../data/eventos.json";
+import { useEventos } from "../context/EventosContext";
 import { useFavoritos } from "../context/FavoritosContext";
 
 export default function FavoritosScreen() {
+  const { eventos } = useEventos();
   const { favoritos, alternarFavorito } = useFavoritos();
   const router = useRouter();
 
-  const eventosFavoritos = eventosData.filter((e) => favoritos.includes(e.id));
+  const eventosFavoritos = eventos.filter((e) => favoritos.includes(e.id));
 
   if (eventosFavoritos.length === 0) {
     return (

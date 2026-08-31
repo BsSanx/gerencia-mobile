@@ -1,6 +1,21 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { useRouter, Link } from "expo-router";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../services/firebase";
+
+function mensagemDeErro(codigo: string) {
+  switch (codigo) {
+    case "auth/email-already-in-use":
+      return "Este e-mail já está cadastrado.";
+    case "auth/invalid-email":
+      return "E-mail inválido.";
+    case "auth/weak-password":
+      return "A senha precisa ter pelo menos 6 caracteres.";
+    default:
+      return "Não foi possível criar a conta. Tente novamente.";
+  }
+}
 
 export default function CadastroScreen() {
   const [cpf, setCpf] = useState("");
@@ -9,12 +24,25 @@ export default function CadastroScreen() {
   const [senha, setSenha] = useState("");
   const [telefone, setTelefone] = useState("");
   const [tipoConta, setTipoConta] = useState<"cliente" | "organizador">("cliente");
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
   const router = useRouter();
 
-  function handleCriarConta() {
-    // Cadastro ainda não conectado a um backend — por enquanto, só valida campos obrigatórios e navega
-    if (nome.trim() && email.trim() && senha.trim()) {
+  async function handleCriarConta() {
+    setErro("");
+    if (!nome.trim() || !email.trim() || !senha.trim()) {
+      setErro("Preencha nome, e-mail e senha.");
+      return;
+    }
+    setCarregando(true);
+    try {
+      const credencial = await createUserWithEmailAndPassword(auth, email.trim(), senha);
+      await updateProfile(credencial.user, { displayName: nome.trim() });
       router.replace("/(tabs)");
+    } catch (e: any) {
+      setErro(mensagemDeErro(e.code));
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -46,7 +74,7 @@ export default function CadastroScreen() {
       />
 
       <Text style={styles.label}>Senha</Text>
-      <TextInput style={styles.input} placeholder="********" value={senha} onChangeText={setSenha} secureTextEntry />
+      <TextInput style={styles.input} placeholder="mín. 6 caracteres" value={senha} onChangeText={setSenha} secureTextEntry />
 
       <Text style={styles.label}>Telefone</Text>
       <TextInput
@@ -75,8 +103,10 @@ export default function CadastroScreen() {
         </Pressable>
       </View>
 
-      <Pressable style={styles.botao} onPress={handleCriarConta}>
-        <Text style={styles.botaoTexto}>Criar conta</Text>
+      {!!erro && <Text style={styles.erro}>{erro}</Text>}
+
+      <Pressable style={styles.botao} onPress={handleCriarConta} disabled={carregando}>
+        {carregando ? <ActivityIndicator color="#fff" /> : <Text style={styles.botaoTexto}>Criar conta</Text>}
       </Pressable>
 
       <Link href="/login" style={styles.link}>
@@ -98,6 +128,7 @@ const styles = StyleSheet.create({
   tipoTitulo: { fontWeight: "bold", marginBottom: 2 },
   tipoTituloAtivo: { color: "#2563eb" },
   tipoDescricao: { fontSize: 12, color: "#6b7280" },
+  erro: { color: "#dc2626", marginTop: 12, fontSize: 13 },
   botao: { backgroundColor: "#2563eb", borderRadius: 10, padding: 14, alignItems: "center", marginTop: 24 },
   botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 15 },
   link: { textAlign: "center", marginTop: 20, color: "#2563eb" },

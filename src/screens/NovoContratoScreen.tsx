@@ -3,17 +3,18 @@ import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, Alert } from 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFornecedores } from "../context/FornecedoresContext";
 import { useContratos } from "../context/ContratosContext";
-import eventosData from "../data/eventos.json";
+import { useEventos } from "../context/EventosContext";
 
 export default function NovoContratoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { fornecedores } = useFornecedores();
   const { criarContrato } = useContratos();
+  const { eventos } = useEventos();
 
   const fornecedor = fornecedores.find((f) => f.id === id);
 
-  const [eventoId, setEventoId] = useState(eventosData[0]?.id ?? "");
+  const [eventoId, setEventoId] = useState("");
   const [dataContrato, setDataContrato] = useState("");
   const [valorAdiantamento, setValorAdiantamento] = useState("");
   const [valorTotal, setValorTotal] = useState("");
@@ -30,8 +31,8 @@ export default function NovoContratoScreen() {
   }
 
   function handleSalvar() {
-    if (!dataContrato.trim() || !valorTotal.trim()) {
-      Alert.alert("Campos obrigatórios", "Preencha ao menos a data do contrato e o valor total.");
+    if (!eventoId || !dataContrato.trim() || !valorTotal.trim()) {
+      Alert.alert("Campos obrigatórios", "Escolha um evento e preencha ao menos a data e o valor total.");
       return;
     }
 
@@ -62,7 +63,7 @@ export default function NovoContratoScreen() {
 
       <Text style={styles.label}>Evento</Text>
       <View style={styles.linhaWrap}>
-        {eventosData.map((ev) => (
+        {eventos.map((ev) => (
           <Pressable
             key={ev.id}
             style={[styles.opcao, eventoId === ev.id && styles.opcaoAtiva]}

@@ -2,13 +2,14 @@ import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFornecedores } from "../context/FornecedoresContext";
 import { useContratos } from "../context/ContratosContext";
-import eventosData from "../data/eventos.json";
+import { useEventos } from "../context/EventosContext";
 
 export default function FornecedorDetalhesScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { fornecedores } = useFornecedores();
   const { getContratosDoFornecedor } = useContratos();
+  const { eventos } = useEventos();
 
   const fornecedor = fornecedores.find((f) => f.id === id);
   const contratos = fornecedor ? getContratosDoFornecedor(fornecedor.id) : [];
@@ -22,7 +23,7 @@ export default function FornecedorDetalhesScreen() {
   }
 
   function nomeEvento(eventoId: string) {
-    return eventosData.find((e) => e.id === eventoId)?.nome ?? "Evento";
+    return eventos.find((e) => e.id === eventoId)?.nome ?? "Evento";
   }
 
   return (

@@ -1,13 +1,14 @@
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import eventos from "../data/eventos.json";
+import { useEventos } from "../context/EventosContext";
 import { useInscricoes } from "../context/InscricoesContext";
 
 export default function EventoDetalhesScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { eventos } = useEventos();
   const evento = eventos.find((e) => e.id === id);
-  const { inscrever, cancelar, getInscricaoDoEvento, getVagasOcupadas } = useInscricoes();
+  const { inscrever, cancelar, getInscricaoDoEvento } = useInscricoes();
 
   if (!evento) {
     return (
@@ -18,8 +19,7 @@ export default function EventoDetalhesScreen() {
   }
 
   const inscricao = getInscricaoDoEvento(evento.id);
-  const vagasOcupadas = getVagasOcupadas(evento.id);
-  const vagasRestantes = evento.capacidade - vagasOcupadas;
+  const vagasRestantes = evento.capacidade - evento.inscritos;
   const lotado = vagasRestantes <= 0;
 
   return (

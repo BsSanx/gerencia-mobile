@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { collection, onSnapshot, addDoc, getDocs, query } from "firebase/firestore";
+import { db } from "../services/firebase";
 import eventosIniciais from "../data/eventos.json";
 
 export type Evento = {
@@ -22,27 +24,52 @@ type NovoEvento = Omit<Evento, "id" | "inscritos" | "codigo" | "status">;
 
 type EventosContextType = {
   eventos: Evento[];
-  criarEvento: (dados: NovoEvento) => void;
+  carregando: boolean;
+  criarEvento: (dados: NovoEvento) => Promise<void>;
 };
 
 const EventosContext = createContext<EventosContextType | undefined>(undefined);
 
 export function EventosProvider({ children }: { children: ReactNode }) {
-  const [eventos, setEventos] = useState<Evento[]>(eventosIniciais as Evento[]);
+  const [eventos, setEventos] = useState<Evento[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
-  function criarEvento(dados: NovoEvento) {
-    const novo: Evento = {
+  useEffect(() => {
+    const ref = collection(db, "eventos");
+
+    async function seedSeNecessario() {
+      const snap = await getDocs(query(ref));
+      if (snap.empty) {
+        for (const ev of eventosIniciais as Evento[]) {
+          const { id, ...dados } = ev;
+          await addDoc(ref, dados);
+        }
+      }
+    }
+
+    seedSeNecessario();
+
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Evento[];
+      setEventos(lista);
+      setCarregando(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  async function criarEvento(dados: NovoEvento) {
+    const ref = collection(db, "eventos");
+    await addDoc(ref, {
       ...dados,
-      id: Date.now().toString(),
       inscritos: 0,
       codigo: `EVT-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       status: "ativo",
-    };
-    setEventos((prev) => [novo, ...prev]);
+    });
   }
 
   return (
-    <EventosContext.Provider value={{ eventos, criarEvento }}>
+    <EventosContext.Provider value={{ eventos, carregando, criarEvento }}>
       {children}
     </EventosContext.Provider>
   );

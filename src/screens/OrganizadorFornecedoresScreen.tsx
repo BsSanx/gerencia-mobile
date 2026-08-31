@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useFornecedores } from "../context/FornecedoresContext";
+import OrganizadorNav from "../components/OrganizadorNav";
 
 export default function OrganizadorFornecedoresScreen() {
   const router = useRouter();
@@ -11,6 +12,8 @@ export default function OrganizadorFornecedoresScreen() {
       <Pressable onPress={() => router.back()} style={styles.voltar}>
         <Text style={styles.voltarTexto}>{"< Voltar"}</Text>
       </Pressable>
+
+      <OrganizadorNav />
 
       <View style={styles.topo}>
         <View>

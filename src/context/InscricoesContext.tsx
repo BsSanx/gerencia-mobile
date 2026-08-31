@@ -1,11 +1,25 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import eventosData from "../data/eventos.json";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  doc,
+  query,
+  where,
+  getDocs,
+  increment,
+} from "firebase/firestore";
+import { db } from "../services/firebase";
+import { useAuth } from "./AuthContext";
+import { useEventos } from "./EventosContext";
 
 export type StatusInscricao = "confirmada" | "espera" | "cancelada";
 
 export type Inscricao = {
   id: string;
   eventoId: string;
+  usuarioId: string;
   status: StatusInscricao;
   dataInscricao: string;
   posicaoFila?: number;
@@ -14,11 +28,10 @@ export type Inscricao = {
 
 type InscricoesContextType = {
   inscricoes: Inscricao[];
-  inscrever: (eventoId: string) => void;
-  cancelar: (inscricaoId: string) => void;
+  inscrever: (eventoId: string) => Promise<void>;
+  cancelar: (inscricaoId: string) => Promise<void>;
   getInscricaoDoEvento: (eventoId: string) => Inscricao | undefined;
-  getVagasOcupadas: (eventoId: string) => number;
-  fazerCheckin: (inscricaoId: string) => boolean;
+  fazerCheckin: (inscricaoId: string) => Promise<boolean>;
   podeFazerCheckin: (eventoId: string) => boolean;
 };
 
@@ -33,64 +46,78 @@ function estaNoPeriodoDoEvento(dataInicio: string, dataFim: string) {
 }
 
 export function InscricoesProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  const { eventos } = useEventos();
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
 
-  function getVagasOcupadas(eventoId: string) {
-    const evento = eventosData.find((e) => e.id === eventoId);
-    const baseInscritos = evento ? evento.inscritos : 0;
-    const confirmadasNoApp = inscricoes.filter(
-      (i) => i.eventoId === eventoId && i.status === "confirmada"
-    ).length;
-    return baseInscritos + confirmadasNoApp;
-  }
+  useEffect(() => {
+    if (!user) {
+      setInscricoes([]);
+      return;
+    }
+    const ref = collection(db, "inscricoes");
+    const q = query(ref, where("usuarioId", "==", user.uid));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Inscricao[];
+      setInscricoes(lista);
+    });
+    return unsubscribe;
+  }, [user]);
 
-  function inscrever(eventoId: string) {
-    const evento = eventosData.find((e) => e.id === eventoId);
+  async function inscrever(eventoId: string) {
+    if (!user) return;
+    const evento = eventos.find((e) => e.id === eventoId);
     if (!evento) return;
 
     const jaInscrito = inscricoes.find((i) => i.eventoId === eventoId && i.status !== "cancelada");
     if (jaInscrito) return;
 
-    const vagasOcupadas = getVagasOcupadas(eventoId);
-    const temVaga = vagasOcupadas < evento.capacidade;
+    const inscricoesRef = collection(db, "inscricoes");
+    const temVaga = evento.inscritos < evento.capacidade;
 
-    const novaInscricao: Inscricao = {
-      id: Date.now().toString(),
-      eventoId,
-      status: temVaga ? "confirmada" : "espera",
-      dataInscricao: new Date().toISOString(),
-      posicaoFila: temVaga
-        ? undefined
-        : inscricoes.filter((i) => i.eventoId === eventoId && i.status === "espera").length + 1,
-    };
-
-    setInscricoes((prev) => [...prev, novaInscricao]);
+    if (temVaga) {
+      await addDoc(inscricoesRef, {
+        eventoId,
+        usuarioId: user.uid,
+        status: "confirmada",
+        dataInscricao: new Date().toISOString(),
+      });
+      await updateDoc(doc(db, "eventos", eventoId), { inscritos: increment(1) });
+    } else {
+      const q = query(inscricoesRef, where("eventoId", "==", eventoId), where("status", "==", "espera"));
+      const snap = await getDocs(q);
+      await addDoc(inscricoesRef, {
+        eventoId,
+        usuarioId: user.uid,
+        status: "espera",
+        dataInscricao: new Date().toISOString(),
+        posicaoFila: snap.size + 1,
+      });
+    }
   }
 
-  function cancelar(inscricaoId: string) {
-    setInscricoes((prev) => {
-      const alvo = prev.find((i) => i.id === inscricaoId);
-      if (!alvo) return prev;
+  async function cancelar(inscricaoId: string) {
+    const alvo = inscricoes.find((i) => i.id === inscricaoId);
+    if (!alvo) return;
 
-      const atualizadas = prev.map((i) =>
-        i.id === inscricaoId ? { ...i, status: "cancelada" as StatusInscricao } : i
-      );
+    await updateDoc(doc(db, "inscricoes", inscricaoId), { status: "cancelada" });
 
-      if (alvo.status === "confirmada") {
-        const fila = atualizadas
-          .filter((i) => i.eventoId === alvo.eventoId && i.status === "espera")
-          .sort((a, b) => (a.posicaoFila ?? 0) - (b.posicaoFila ?? 0));
+    if (alvo.status === "confirmada") {
+      await updateDoc(doc(db, "eventos", alvo.eventoId), { inscritos: increment(-1) });
 
-        if (fila.length > 0) {
-          const proximo = fila[0];
-          return atualizadas.map((i) =>
-            i.id === proximo.id ? { ...i, status: "confirmada", posicaoFila: undefined } : i
-          );
-        }
+      const inscricoesRef = collection(db, "inscricoes");
+      const q = query(inscricoesRef, where("eventoId", "==", alvo.eventoId), where("status", "==", "espera"));
+      const snap = await getDocs(q);
+      const fila = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }) as Inscricao)
+        .sort((a, b) => (a.posicaoFila ?? 0) - (b.posicaoFila ?? 0));
+
+      if (fila.length > 0) {
+        const proximo = fila[0];
+        await updateDoc(doc(db, "inscricoes", proximo.id), { status: "confirmada", posicaoFila: null });
+        await updateDoc(doc(db, "eventos", alvo.eventoId), { inscritos: increment(1) });
       }
-
-      return atualizadas;
-    });
+    }
   }
 
   function getInscricaoDoEvento(eventoId: string) {
@@ -98,33 +125,23 @@ export function InscricoesProvider({ children }: { children: ReactNode }) {
   }
 
   function podeFazerCheckin(eventoId: string) {
-    const evento = eventosData.find((e) => e.id === eventoId);
+    const evento = eventos.find((e) => e.id === eventoId);
     if (!evento) return false;
     return estaNoPeriodoDoEvento(evento.dataInicio, evento.dataFim);
   }
 
-  function fazerCheckin(inscricaoId: string): boolean {
+  async function fazerCheckin(inscricaoId: string): Promise<boolean> {
     const alvo = inscricoes.find((i) => i.id === inscricaoId);
     if (!alvo || alvo.status !== "confirmada" || alvo.checkin) return false;
     if (!podeFazerCheckin(alvo.eventoId)) return false;
 
-    setInscricoes((prev) =>
-      prev.map((i) => (i.id === inscricaoId ? { ...i, checkin: new Date().toISOString() } : i))
-    );
+    await updateDoc(doc(db, "inscricoes", inscricaoId), { checkin: new Date().toISOString() });
     return true;
   }
 
   return (
     <InscricoesContext.Provider
-      value={{
-        inscricoes,
-        inscrever,
-        cancelar,
-        getInscricaoDoEvento,
-        getVagasOcupadas,
-        fazerCheckin,
-        podeFazerCheckin,
-      }}
+      value={{ inscricoes, inscrever, cancelar, getInscricaoDoEvento, fazerCheckin, podeFazerCheckin }}
     >
       {children}
     </InscricoesContext.Provider>

@@ -1,11 +1,20 @@
-import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
+import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import eventos from "../data/eventos.json";
+import { useEventos } from "../context/EventosContext";
 import { useFavoritos } from "../context/FavoritosContext";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { eventos, carregando } = useEventos();
   const { ehFavorito, alternarFavorito } = useFavoritos();
+
+  if (carregando) {
+    return (
+      <View style={styles.carregandoContainer}>
+        <ActivityIndicator size="large" color="#2563eb" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -42,6 +51,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 60, paddingHorizontal: 16, backgroundColor: "#fff" },
+  carregandoContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
   titulo: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
   lista: { gap: 12, paddingBottom: 24 },
   card: { borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 12, padding: 14 },

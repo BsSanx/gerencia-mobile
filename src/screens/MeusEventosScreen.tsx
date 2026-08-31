@@ -1,9 +1,10 @@
 import { View, Text, FlatList, StyleSheet, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import eventosData from "../data/eventos.json";
+import { useEventos } from "../context/EventosContext";
 import { useInscricoes } from "../context/InscricoesContext";
 
 export default function MeusEventosScreen() {
+  const { eventos } = useEventos();
   const { inscricoes, cancelar, fazerCheckin, podeFazerCheckin } = useInscricoes();
   const router = useRouter();
 
@@ -11,17 +12,18 @@ export default function MeusEventosScreen() {
     .filter((i) => i.status !== "cancelada")
     .map((i) => ({
       ...i,
-      evento: eventosData.find((e) => e.id === i.eventoId),
+      evento: eventos.find((e) => e.id === i.eventoId),
     }))
     .filter((i) => i.evento);
 
   function handleCheckin(inscricaoId: string) {
-    const sucesso = fazerCheckin(inscricaoId);
-    if (sucesso) {
-      Alert.alert("Check-in realizado", "Presença confirmada com sucesso!");
-    } else {
-      Alert.alert("Não foi possível fazer check-in", "O check-in só é permitido durante o período do evento.");
-    }
+    fazerCheckin(inscricaoId).then((sucesso) => {
+      if (sucesso) {
+        Alert.alert("Check-in realizado", "Presença confirmada com sucesso!");
+      } else {
+        Alert.alert("Não foi possível fazer check-in", "O check-in só é permitido durante o período do evento.");
+      }
+    });
   }
 
   if (ativas.length === 0) {

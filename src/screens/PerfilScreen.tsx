@@ -1,15 +1,35 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { updateProfile, signOut } from "firebase/auth";
+import { auth } from "../services/firebase";
+import { useAuth } from "../context/AuthContext";
 
 export default function PerfilScreen() {
-  const [nome, setNome] = useState("Ana Paula Santos");
-  const [email, setEmail] = useState("ana.paula@email.com");
-  const [telefone, setTelefone] = useState("(11) 98765-4321");
-  const [bio, setBio] = useState("Apaixonada por tecnologia e eventos de inovação.");
+  const { user } = useAuth();
+  const router = useRouter();
 
-  function handleSalvar() {
-    Alert.alert("Perfil atualizado", "Suas informações foram salvas.");
+  const [nome, setNome] = useState(user?.displayName ?? "");
+  const [telefone, setTelefone] = useState("");
+  const [bio, setBio] = useState("");
+  const [salvando, setSalvando] = useState(false);
+
+  async function handleSalvar() {
+    if (!auth.currentUser) return;
+    setSalvando(true);
+    try {
+      await updateProfile(auth.currentUser, { displayName: nome.trim() });
+      Alert.alert("Perfil atualizado", "Suas informações foram salvas.");
+    } catch {
+      Alert.alert("Erro", "Não foi possível salvar agora.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function handleSair() {
+    await signOut(auth);
+    router.replace("/login");
   }
 
   return (
@@ -20,30 +40,25 @@ export default function PerfilScreen() {
       <View style={styles.avatarCard}>
         <View style={styles.avatar}>
           <Text style={styles.avatarTexto}>
-            {nome
+            {(nome || user?.email || "?")
               .split(" ")
               .map((n) => n[0])
               .slice(0, 2)
-              .join("")}
+              .join("")
+              .toUpperCase()}
           </Text>
         </View>
-        <Text style={styles.avatarNome}>{nome}</Text>
+        <Text style={styles.avatarNome}>{nome || "Sem nome definido"}</Text>
       </View>
 
       <Text style={styles.label}>Nome completo</Text>
-      <TextInput style={styles.input} value={nome} onChangeText={setNome} />
+      <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholder="Seu nome" />
 
       <Text style={styles.label}>E-mail</Text>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      <TextInput style={[styles.input, styles.inputDesabilitado]} value={user?.email ?? ""} editable={false} />
 
       <Text style={styles.label}>Telefone</Text>
-      <TextInput style={styles.input} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
+      <TextInput style={styles.input} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" placeholder="(11) 99999-9999" />
 
       <Text style={styles.label}>Bio</Text>
       <TextInput
@@ -52,10 +67,11 @@ export default function PerfilScreen() {
         onChangeText={setBio}
         multiline
         numberOfLines={3}
+        placeholder="Fale um pouco sobre você"
       />
 
-      <Pressable style={styles.botao} onPress={handleSalvar}>
-        <Text style={styles.botaoTexto}>Salvar alterações</Text>
+      <Pressable style={styles.botao} onPress={handleSalvar} disabled={salvando}>
+        <Text style={styles.botaoTexto}>{salvando ? "Salvando..." : "Salvar alterações"}</Text>
       </Pressable>
 
       <Link href="/organizador" style={styles.linkOrganizador}>
@@ -65,6 +81,10 @@ export default function PerfilScreen() {
       <Link href="/admin" style={styles.linkAdmin}>
         Acessar painel do Admin (demo)
       </Link>
+
+      <Pressable style={styles.botaoSair} onPress={handleSair}>
+        <Text style={styles.botaoSairTexto}>Sair da conta</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -79,9 +99,12 @@ const styles = StyleSheet.create({
   avatarNome: { fontWeight: "600", fontSize: 15 },
   label: { fontSize: 13, fontWeight: "600", marginBottom: 6, marginTop: 12 },
   input: { borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 10, padding: 12, fontSize: 15 },
+  inputDesabilitado: { backgroundColor: "#f9fafb", color: "#6b7280" },
   inputMultilinha: { height: 80, textAlignVertical: "top" },
   botao: { backgroundColor: "#2563eb", borderRadius: 10, padding: 14, alignItems: "center", marginTop: 24 },
   botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 15 },
   linkOrganizador: { textAlign: "center", marginTop: 24, color: "#7c3aed", fontWeight: "600" },
   linkAdmin: { textAlign: "center", marginTop: 12, color: "#111827", fontWeight: "600" },
+  botaoSair: { alignItems: "center", marginTop: 24, borderTopWidth: 1, borderTopColor: "#f3f4f6", paddingTop: 20 },
+  botaoSairTexto: { color: "#dc2626", fontWeight: "600", fontSize: 14 },
 });
