@@ -29,6 +29,12 @@ export default function OrganizadorDashboardScreen() {
         </View>
       </View>
 
+      <View style={styles.menuContainer}>
+        <Pressable style={styles.menuItem} onPress={() => router.push("/organizador/fornecedores")}>
+          <Text style={styles.menuItemTexto}>Fornecedores</Text>
+        </Pressable>
+      </View>
+
       <View style={styles.listaTopo}>
         <Text style={styles.secaoTitulo}>Meus Eventos</Text>
         <Pressable style={styles.botaoCriar} onPress={() => router.push("/organizador/criar-evento")}>
@@ -62,10 +68,13 @@ const styles = StyleSheet.create({
   voltarTexto: { color: "#7c3aed", fontSize: 15 },
   titulo: { fontSize: 22, fontWeight: "bold" },
   subtitulo: { color: "#6b7280", marginBottom: 16 },
-  statsContainer: { flexDirection: "row", gap: 12, marginBottom: 20 },
+  statsContainer: { flexDirection: "row", gap: 12, marginBottom: 16 },
   statCard: { flex: 1, backgroundColor: "#f5f3ff", borderRadius: 12, padding: 14 },
   statValor: { fontSize: 24, fontWeight: "bold", color: "#7c3aed" },
   statLabel: { fontSize: 12, color: "#6b7280", marginTop: 2 },
+  menuContainer: { flexDirection: "row", gap: 10, marginBottom: 20 },
+  menuItem: { borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14 },
+  menuItemTexto: { color: "#374151", fontWeight: "600", fontSize: 13 },
   listaTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
   secaoTitulo: { fontSize: 16, fontWeight: "bold" },
   botaoCriar: { backgroundColor: "#7c3aed", borderRadius: 8, paddingVertical: 8, paddingHorizontal: 12 },
