@@ -4,6 +4,7 @@ import { useEventos } from "../context/EventosContext";
 import { useFavoritos } from "../context/FavoritosContext";
 import EventoCard from "../components/EventoCard";
 import MenuButton from "../components/MenuButton";
+import NotificationBell from "../components/NotificationBell";
 import { colors } from "../theme/colors";
 
 export default function FavoritosScreen() {
@@ -18,8 +19,11 @@ export default function FavoritosScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <View style={styles.headerTopo}>
-            <MenuButton />
-            <Text style={styles.titulo}>Meus Favoritos</Text>
+            <View style={styles.headerEsquerda}>
+              <MenuButton />
+              <Text style={styles.titulo}>Meus Favoritos</Text>
+            </View>
+            <NotificationBell />
           </View>
         </View>
         <View style={styles.vazioContainer}>
@@ -34,8 +38,11 @@ export default function FavoritosScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTopo}>
-          <MenuButton />
-          <Text style={styles.titulo}>Meus Favoritos</Text>
+          <View style={styles.headerEsquerda}>
+            <MenuButton />
+            <Text style={styles.titulo}>Meus Favoritos</Text>
+          </View>
+          <NotificationBell />
         </View>
         <Text style={styles.subtitulo}>{eventosFavoritos.length} eventos salvos</Text>
       </View>
@@ -66,7 +73,8 @@ export default function FavoritosScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   header: { paddingTop: 50, paddingHorizontal: 16, paddingBottom: 12 },
-  headerTopo: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headerTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  headerEsquerda: { flexDirection: "row", alignItems: "center", gap: 8 },
   titulo: { fontSize: 22, fontWeight: "bold", color: colors.textPrimary },
   subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2, marginLeft: 44 },
   lista: { gap: 12, paddingHorizontal: 16, paddingBottom: 24 },

@@ -1,5 +1,7 @@
 import { View, Text, StyleSheet, Pressable, FlatList } from "react-native";
 import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
+import { auth } from "../services/firebase";
 import { useEventos } from "../context/EventosContext";
 import { useUsuarios } from "../context/UsuariosContext";
 import { colors, shadow } from "../theme/colors";
@@ -18,21 +20,27 @@ export default function AdminDashboardScreen() {
   }, {});
   const categorias = Object.entries(porCategoria).sort((a, b) => b[1] - a[1]);
 
+  async function handleSair() {
+    await signOut(auth);
+    router.replace("/login");
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
-        <View style={styles.iconBadge}>
-          <Text style={styles.iconBadgeTexto}>🛡️</Text>
+        <View style={styles.headerEsquerda}>
+          <View style={styles.iconBadge}>
+            <Text style={styles.iconBadgeTexto}>🛡️</Text>
+          </View>
+          <View>
+            <Text style={styles.headerTitulo}>GerenCIA</Text>
+            <Text style={styles.headerSubtitulo}>Painel Administrativo</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.headerTitulo}>GerenCIA</Text>
-          <Text style={styles.headerSubtitulo}>Painel Administrativo</Text>
-        </View>
+        <Pressable onPress={handleSair}>
+          <Text style={styles.sairTexto}>Sair da conta</Text>
+        </Pressable>
       </View>
-
-      <Pressable onPress={() => router.back()} style={styles.voltar}>
-        <Text style={styles.voltarTexto}>{"< Voltar"}</Text>
-      </Pressable>
 
       <View style={styles.conteudo}>
         <Text style={styles.titulo}>Dashboard Administrativo</Text>
@@ -101,19 +109,19 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   headerBar: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: 12,
     backgroundColor: colors.navy,
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 16,
   },
+  headerEsquerda: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBadge: { width: 40, height: 40, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center" },
   iconBadgeTexto: { fontSize: 18 },
   headerTitulo: { fontSize: 16, fontWeight: "bold", color: "#fff" },
   headerSubtitulo: { fontSize: 12, color: "rgba(255,255,255,0.7)" },
-  voltar: { marginTop: 16, marginLeft: 16 },
-  voltarTexto: { color: colors.textPrimary, fontSize: 15 },
+  sairTexto: { color: "#f87171", fontWeight: "600", fontSize: 13 },
   conteudo: { paddingHorizontal: 16, paddingTop: 16 },
   titulo: { fontSize: 22, fontWeight: "bold", color: colors.textPrimary },
   subtitulo: { color: colors.textSecondary, marginBottom: 16 },

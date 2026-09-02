@@ -26,59 +26,57 @@ export default function OrganizadorDashboardScreen() {
         </View>
       </View>
 
-      <Pressable onPress={() => router.back()} style={styles.voltar}>
-        <Text style={styles.voltarTexto}>{"< Voltar"}</Text>
-      </Pressable>
+      <View style={styles.conteudo}>
+        <OrganizadorNav />
 
-      <OrganizadorNav />
-
-      <View style={styles.statsContainer}>
-        <View style={[styles.statCard, { backgroundColor: colors.purpleLight }]}>
-          <View style={[styles.statIcone, { backgroundColor: colors.purple }]}>
-            <Text style={styles.statIconeTexto}>📅</Text>
-          </View>
-          <Text style={[styles.statValor, { color: colors.purple }]}>{eventosAtivos}</Text>
-          <Text style={styles.statLabel}>Eventos ativos</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.blueLight }]}>
-          <View style={[styles.statIcone, { backgroundColor: colors.blue }]}>
-            <Text style={styles.statIconeTexto}>👥</Text>
-          </View>
-          <Text style={[styles.statValor, { color: colors.blue }]}>{totalInscritos}</Text>
-          <Text style={styles.statLabel}>Total de inscritos</Text>
-        </View>
-      </View>
-
-      <View style={styles.listaTopo}>
-        <Text style={styles.secaoTitulo}>Meus Eventos</Text>
-        <Pressable style={styles.botaoCriar} onPress={() => router.push("/organizador/criar-evento")}>
-          <Text style={styles.botaoCriarTexto}>+ Criar evento</Text>
-        </Pressable>
-      </View>
-
-      {meusEventos.length === 0 ? (
-        <Text style={styles.vazioTexto}>Você ainda não criou nenhum evento.</Text>
-      ) : (
-        <FlatList
-          data={meusEventos}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.lista}
-          renderItem={({ item }) => (
-            <View style={[styles.card, shadow]}>
-              <View style={styles.cardBarra} />
-              <View style={styles.cardConteudo}>
-                <Text style={styles.nome}>{item.nome}</Text>
-                <Text style={styles.detalhe}>
-                  {item.dataInicio} · {item.local}
-                </Text>
-                <Text style={styles.ocupacao}>
-                  {item.inscritos}/{item.capacidade} inscritos
-                </Text>
-              </View>
+        <View style={styles.statsContainer}>
+          <View style={[styles.statCard, { backgroundColor: colors.purpleLight }]}>
+            <View style={[styles.statIcone, { backgroundColor: colors.purple }]}>
+              <Text style={styles.statIconeTexto}>📅</Text>
             </View>
-          )}
-        />
-      )}
+            <Text style={[styles.statValor, { color: colors.purple }]}>{eventosAtivos}</Text>
+            <Text style={styles.statLabel}>Eventos ativos</Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: colors.blueLight }]}>
+            <View style={[styles.statIcone, { backgroundColor: colors.blue }]}>
+              <Text style={styles.statIconeTexto}>👥</Text>
+            </View>
+            <Text style={[styles.statValor, { color: colors.blue }]}>{totalInscritos}</Text>
+            <Text style={styles.statLabel}>Total de inscritos</Text>
+          </View>
+        </View>
+
+        <View style={styles.listaTopo}>
+          <Text style={styles.secaoTitulo}>Meus Eventos</Text>
+          <Pressable style={styles.botaoCriar} onPress={() => router.push("/organizador/criar-evento")}>
+            <Text style={styles.botaoCriarTexto}>+ Criar evento</Text>
+          </Pressable>
+        </View>
+
+        {meusEventos.length === 0 ? (
+          <Text style={styles.vazioTexto}>Você ainda não criou nenhum evento.</Text>
+        ) : (
+          <FlatList
+            data={meusEventos}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.lista}
+            renderItem={({ item }) => (
+              <View style={[styles.card, shadow]}>
+                <View style={styles.cardBarra} />
+                <View style={styles.cardConteudo}>
+                  <Text style={styles.nome}>{item.nome}</Text>
+                  <Text style={styles.detalhe}>
+                    {item.dataInicio} · {item.local}
+                  </Text>
+                  <Text style={styles.ocupacao}>
+                    {item.inscritos}/{item.capacidade} inscritos
+                  </Text>
+                </View>
+              </View>
+            )}
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -100,20 +98,19 @@ const styles = StyleSheet.create({
   iconBadgeTexto: { fontSize: 18 },
   headerTitulo: { fontSize: 16, fontWeight: "bold", color: colors.textPrimary },
   headerSubtitulo: { fontSize: 12, color: colors.textSecondary },
-  voltar: { marginTop: 16, marginLeft: 16 },
-  voltarTexto: { color: colors.purple, fontSize: 15 },
-  statsContainer: { flexDirection: "row", gap: 12, marginTop: 16, paddingHorizontal: 16 },
-  statCard: { flex: 1, borderRadius: 14, padding: 16 },
-  statIcone: { width: 32, height: 32, borderRadius: 8, alignItems: "center", justifyContent: "center", marginBottom: 10 },
-  statIconeTexto: { fontSize: 14 },
-  statValor: { fontSize: 24, fontWeight: "bold" },
+  conteudo: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
+  statsContainer: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  statCard: { flex: 1, borderRadius: 14, padding: 14 },
+  statIcone: { width: 30, height: 30, borderRadius: 8, alignItems: "center", justifyContent: "center", marginBottom: 8 },
+  statIconeTexto: { fontSize: 13 },
+  statValor: { fontSize: 22, fontWeight: "bold" },
   statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-  listaTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 24, marginBottom: 12, paddingHorizontal: 16 },
+  listaTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
   secaoTitulo: { fontSize: 16, fontWeight: "bold", color: colors.textPrimary },
   botaoCriar: { backgroundColor: colors.purple, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 12 },
   botaoCriarTexto: { color: "#fff", fontWeight: "600", fontSize: 13 },
-  vazioTexto: { color: colors.textSecondary, fontSize: 14, paddingHorizontal: 16 },
-  lista: { gap: 10, paddingHorizontal: 16, paddingBottom: 24 },
+  vazioTexto: { color: colors.textSecondary, fontSize: 14 },
+  lista: { gap: 10, paddingBottom: 24 },
   card: { flexDirection: "row", backgroundColor: colors.card, borderRadius: 12, overflow: "hidden" },
   cardBarra: { width: 4, backgroundColor: colors.purple },
   cardConteudo: { flex: 1, padding: 12 },

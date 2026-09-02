@@ -5,6 +5,7 @@ import { useEventos } from "../context/EventosContext";
 import { useFavoritos } from "../context/FavoritosContext";
 import EventoCard from "../components/EventoCard";
 import MenuButton from "../components/MenuButton";
+import NotificationBell from "../components/NotificationBell";
 import { colors } from "../theme/colors";
 
 export default function HomeScreen() {
@@ -32,7 +33,10 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.banner}>
-        <MenuButton cor="#fff" />
+        <View style={styles.bannerTopo}>
+          <MenuButton cor="#fff" />
+          <NotificationBell cor="#fff" />
+        </View>
         <Text style={styles.bannerEyebrow}>Destaques da semana</Text>
         <Text style={styles.bannerTitulo}>Descubra novos eventos</Text>
         <Text style={styles.bannerSubtitulo}>{eventos.length} eventos disponíveis para você</Text>
@@ -84,6 +88,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   carregandoContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.bg },
   banner: { backgroundColor: colors.blue, paddingTop: 50, paddingBottom: 24, paddingHorizontal: 20 },
+  bannerTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   bannerEyebrow: { color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: "600", marginTop: 12, marginBottom: 6 },
   bannerTitulo: { color: "#fff", fontSize: 22, fontWeight: "bold", marginBottom: 4 },
   bannerSubtitulo: { color: "rgba(255,255,255,0.85)", fontSize: 13 },

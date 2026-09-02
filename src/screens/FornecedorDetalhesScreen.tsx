@@ -68,7 +68,12 @@ export default function FornecedorDetalhesScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.lista}
             renderItem={({ item }) => (
-              <View style={[styles.card, shadow]}>
+              <Pressable
+                style={[styles.card, shadow]}
+                onPress={() =>
+                  router.push({ pathname: "/organizador/eventos/[id]", params: { id: item.eventoId } })
+                }
+              >
                 <View style={styles.cardTopo}>
                   <Text style={styles.eventoNome}>{nomeEvento(item.eventoId)}</Text>
                   <Text style={item.situacao === "ativo" ? styles.situacaoAtiva : styles.situacaoEncerrada}>
@@ -82,7 +87,7 @@ export default function FornecedorDetalhesScreen() {
                   {item.valorAdiantamento.toLocaleString("pt-BR")})
                 </Text>
                 {!!item.objetivo && <Text style={styles.objetivo}>{item.objetivo}</Text>}
-              </View>
+              </Pressable>
             )}
           />
         )}

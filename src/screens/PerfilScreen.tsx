@@ -5,6 +5,7 @@ import { updateProfile, signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { useAuth } from "../context/AuthContext";
 import MenuButton from "../components/MenuButton";
+import NotificationBell from "../components/NotificationBell";
 import { colors, shadow } from "../theme/colors";
 
 const LABELS_TIPO: Record<string, string> = {
@@ -53,8 +54,11 @@ export default function PerfilScreen({ esconderLinkOrganizador = false, esconder
     <ScrollView style={styles.tela} contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTopo}>
-          {!esconderMenu && <MenuButton />}
-          <Text style={styles.titulo}>Meu Perfil</Text>
+          <View style={styles.headerEsquerda}>
+            {!esconderMenu && <MenuButton />}
+            <Text style={styles.titulo}>Meu Perfil</Text>
+          </View>
+          {!esconderMenu && <NotificationBell />}
         </View>
         <Text style={styles.subtitulo}>Gerencie suas informações pessoais</Text>
       </View>
@@ -124,7 +128,8 @@ const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: colors.bg },
   container: { paddingHorizontal: 16, paddingBottom: 40 },
   header: { paddingTop: 50, paddingBottom: 16 },
-  headerTopo: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headerTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  headerEsquerda: { flexDirection: "row", alignItems: "center", gap: 8 },
   titulo: { fontSize: 22, fontWeight: "bold", color: colors.textPrimary },
   subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2, marginLeft: 44 },
   avatarCard: { backgroundColor: colors.card, borderRadius: 14, alignItems: "center", paddingVertical: 20, marginBottom: 16 },

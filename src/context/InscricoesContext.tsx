@@ -1,6 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
-import { Alert } from "react-native";
-import { useNotificacoes } from "./NotificacoesContext";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import {
   collection,
   onSnapshot,
@@ -15,6 +13,7 @@ import {
 import { db } from "../services/firebase";
 import { useAuth } from "./AuthContext";
 import { useEventos } from "./EventosContext";
+import { criarNotificacaoParaUsuario } from "./NotificacoesContext";
 
 export type StatusInscricao = "confirmada" | "espera" | "cancelada";
 
@@ -51,38 +50,16 @@ export function InscricoesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { eventos } = useEventos();
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
-  const { adicionarNotificacao } = useNotificacoes();
-
-  const eventosRef = useRef(eventos);
-  useEffect(() => {
-    eventosRef.current = eventos;
-  }, [eventos]);
-
-  const inscricoesAnterioresRef = useRef<Inscricao[]>([]);
 
   useEffect(() => {
     if (!user) {
       setInscricoes([]);
-      inscricoesAnterioresRef.current = [];
       return;
     }
     const ref = collection(db, "inscricoes");
     const q = query(ref, where("usuarioId", "==", user.uid));
     const unsubscribe = onSnapshot(q, (snap) => {
       const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Inscricao[];
-
-      // Detecta promoção: estava "espera" e virou "confirmada" -> avisa o usuário
-      lista.forEach((atual) => {
-        const anterior = inscricoesAnterioresRef.current.find((i) => i.id === atual.id);
-        if (anterior && anterior.status === "espera" && atual.status === "confirmada") {
-          const evento = eventosRef.current.find((e) => e.id === atual.eventoId);
-          const texto = `Você foi promovido da lista de espera. Sua inscrição em "${evento?.nome ?? "um evento"}" está confirmada.`;
-          Alert.alert("Vaga liberada! 🎉", texto);
-          adicionarNotificacao(texto);
-        }
-      });
-
-      inscricoesAnterioresRef.current = lista;
       setInscricoes(lista);
     });
     return unsubscribe;
@@ -117,6 +94,13 @@ export function InscricoesProvider({ children }: { children: ReactNode }) {
         dataInscricao: new Date().toISOString(),
         posicaoFila: snap.size + 1,
       });
+
+      if (evento.organizadorId) {
+        await criarNotificacaoParaUsuario(
+          evento.organizadorId,
+          `Uma nova pessoa entrou na lista de espera de "${evento.nome}".`
+        );
+      }
     }
   }
 
@@ -140,6 +124,12 @@ export function InscricoesProvider({ children }: { children: ReactNode }) {
         const proximo = fila[0];
         await updateDoc(doc(db, "inscricoes", proximo.id), { status: "confirmada", posicaoFila: null });
         await updateDoc(doc(db, "eventos", alvo.eventoId), { inscritos: increment(1) });
+
+        const evento = eventos.find((e) => e.id === alvo.eventoId);
+        await criarNotificacaoParaUsuario(
+          proximo.usuarioId,
+          `Você foi promovido da lista de espera! Sua inscrição em "${evento?.nome ?? "um evento"}" está confirmada.`
+        );
       }
     }
   }
