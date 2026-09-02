@@ -1,18 +1,12 @@
-import { Tabs } from "expo-router";
+import { Stack } from "expo-router";
+import { MenuProvider } from "../../context/MenuContext";
+import AppSidebar from "../../components/AppSidebar";
 
 export default function TabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#2563eb",
-        tabBarInactiveTintColor: "#9ca3af",
-      }}
-    >
-      <Tabs.Screen name="index" options={{ title: "Início" }} />
-      <Tabs.Screen name="favoritos" options={{ title: "Favoritos" }} />
-      <Tabs.Screen name="meus-eventos" options={{ title: "Meus Eventos" }} />
-      <Tabs.Screen name="perfil" options={{ title: "Perfil" }} />
-    </Tabs>
+    <MenuProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+      <AppSidebar />
+    </MenuProvider>
   );
 }

@@ -4,6 +4,7 @@ import { Link, useRouter } from "expo-router";
 import { updateProfile, signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { useAuth } from "../context/AuthContext";
+import MenuButton from "../components/MenuButton";
 import { colors, shadow } from "../theme/colors";
 
 const LABELS_TIPO: Record<string, string> = {
@@ -14,9 +15,10 @@ const LABELS_TIPO: Record<string, string> = {
 
 type Props = {
   esconderLinkOrganizador?: boolean;
+  esconderMenu?: boolean;
 };
 
-export default function PerfilScreen({ esconderLinkOrganizador = false }: Props) {
+export default function PerfilScreen({ esconderLinkOrganizador = false, esconderMenu = false }: Props) {
   const { user, perfil } = useAuth();
   const router = useRouter();
 
@@ -50,7 +52,10 @@ export default function PerfilScreen({ esconderLinkOrganizador = false }: Props)
   return (
     <ScrollView style={styles.tela} contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.titulo}>Meu Perfil</Text>
+        <View style={styles.headerTopo}>
+          {!esconderMenu && <MenuButton />}
+          <Text style={styles.titulo}>Meu Perfil</Text>
+        </View>
         <Text style={styles.subtitulo}>Gerencie suas informações pessoais</Text>
       </View>
 
@@ -118,9 +123,10 @@ export default function PerfilScreen({ esconderLinkOrganizador = false }: Props)
 const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: colors.bg },
   container: { paddingHorizontal: 16, paddingBottom: 40 },
-  header: { paddingTop: 60, paddingBottom: 16 },
+  header: { paddingTop: 50, paddingBottom: 16 },
+  headerTopo: { flexDirection: "row", alignItems: "center", gap: 8 },
   titulo: { fontSize: 22, fontWeight: "bold", color: colors.textPrimary },
-  subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2 },
+  subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2, marginLeft: 44 },
   avatarCard: { backgroundColor: colors.card, borderRadius: 14, alignItems: "center", paddingVertical: 20, marginBottom: 16 },
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.blueLight, alignItems: "center", justifyContent: "center", marginBottom: 8 },
   avatarTexto: { color: colors.blue, fontWeight: "bold", fontSize: 20 },

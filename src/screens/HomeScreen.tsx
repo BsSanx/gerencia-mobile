@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useEventos } from "../context/EventosContext";
 import { useFavoritos } from "../context/FavoritosContext";
 import EventoCard from "../components/EventoCard";
+import MenuButton from "../components/MenuButton";
 import { colors } from "../theme/colors";
 
 export default function HomeScreen() {
@@ -31,6 +32,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.banner}>
+        <MenuButton cor="#fff" />
         <Text style={styles.bannerEyebrow}>Destaques da semana</Text>
         <Text style={styles.bannerTitulo}>Descubra novos eventos</Text>
         <Text style={styles.bannerSubtitulo}>{eventos.length} eventos disponíveis para você</Text>
@@ -81,8 +83,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   carregandoContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.bg },
-  banner: { backgroundColor: colors.blue, paddingTop: 60, paddingBottom: 24, paddingHorizontal: 20 },
-  bannerEyebrow: { color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: "600", marginBottom: 6 },
+  banner: { backgroundColor: colors.blue, paddingTop: 50, paddingBottom: 24, paddingHorizontal: 20 },
+  bannerEyebrow: { color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: "600", marginTop: 12, marginBottom: 6 },
   bannerTitulo: { color: "#fff", fontSize: 22, fontWeight: "bold", marginBottom: 4 },
   bannerSubtitulo: { color: "rgba(255,255,255,0.85)", fontSize: 13 },
   filtrosWrapper: { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: 10 },

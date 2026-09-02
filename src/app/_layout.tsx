@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "../context/AuthContext";
+import { NotificacoesProvider } from "../context/NotificacoesContext";
 import { EventosProvider } from "../context/EventosContext";
 import { InscricoesProvider } from "../context/InscricoesContext";
 import { FavoritosProvider } from "../context/FavoritosContext";
@@ -14,7 +16,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
   const router = useRouter();
 
-    const rotaPublica = segments[0] === "login" || segments[0] === "cadastro" || segments[0] === "recuperar-senha";
+  const rotaPublica = segments[0] === "login" || segments[0] === "cadastro" || segments[0] === "recuperar-senha";
 
   useEffect(() => {
     if (carregando) return;
@@ -36,23 +38,27 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <EventosProvider>
-        <InscricoesProvider>
-          <FavoritosProvider>
-            <FornecedoresProvider>
-              <ContratosProvider>
-                <UsuariosProvider>
-                  <AuthGate>
-                    <Stack screenOptions={{ headerShown: false }} />
-                  </AuthGate>
-                </UsuariosProvider>
-              </ContratosProvider>
-            </FornecedoresProvider>
-          </FavoritosProvider>
-        </InscricoesProvider>
-      </EventosProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <NotificacoesProvider>
+          <EventosProvider>
+            <InscricoesProvider>
+              <FavoritosProvider>
+                <FornecedoresProvider>
+                  <ContratosProvider>
+                    <UsuariosProvider>
+                      <AuthGate>
+                        <Stack screenOptions={{ headerShown: false }} />
+                      </AuthGate>
+                    </UsuariosProvider>
+                  </ContratosProvider>
+                </FornecedoresProvider>
+              </FavoritosProvider>
+            </InscricoesProvider>
+          </EventosProvider>
+        </NotificacoesProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
 

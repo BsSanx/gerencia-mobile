@@ -2,6 +2,7 @@ import { View, Text, FlatList, StyleSheet, Pressable, Alert } from "react-native
 import { useRouter } from "expo-router";
 import { useEventos } from "../context/EventosContext";
 import { useInscricoes } from "../context/InscricoesContext";
+import MenuButton from "../components/MenuButton";
 import { colors, shadow } from "../theme/colors";
 
 export default function MeusEventosScreen() {
@@ -29,9 +30,17 @@ export default function MeusEventosScreen() {
 
   if (ativas.length === 0) {
     return (
-      <View style={styles.vazioContainer}>
-        <Text style={styles.vazioTitulo}>Nenhuma inscrição ainda</Text>
-        <Text style={styles.vazioTexto}>Explore eventos na aba Início e inscreva-se.</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerTopo}>
+            <MenuButton />
+            <Text style={styles.titulo}>Meus Eventos</Text>
+          </View>
+        </View>
+        <View style={styles.vazioContainer}>
+          <Text style={styles.vazioTitulo}>Nenhuma inscrição ainda</Text>
+          <Text style={styles.vazioTexto}>Explore eventos na aba Início e inscreva-se.</Text>
+        </View>
       </View>
     );
   }
@@ -39,7 +48,10 @@ export default function MeusEventosScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.titulo}>Meus Eventos</Text>
+        <View style={styles.headerTopo}>
+          <MenuButton />
+          <Text style={styles.titulo}>Meus Eventos</Text>
+        </View>
         <Text style={styles.subtitulo}>Eventos em que você está inscrito ou na fila</Text>
       </View>
       <FlatList
@@ -96,9 +108,10 @@ export default function MeusEventosScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  header: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 12 },
+  header: { paddingTop: 50, paddingHorizontal: 16, paddingBottom: 12 },
+  headerTopo: { flexDirection: "row", alignItems: "center", gap: 8 },
   titulo: { fontSize: 22, fontWeight: "bold", color: colors.textPrimary },
-  subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2 },
+  subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2, marginLeft: 44 },
   lista: { gap: 12, paddingHorizontal: 16, paddingBottom: 24 },
   card: { backgroundColor: colors.card, borderRadius: 14, padding: 14 },
   cardTopo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
@@ -114,7 +127,7 @@ const styles = StyleSheet.create({
   checkinIndisponivel: { color: colors.textSecondary, fontSize: 12, fontStyle: "italic" },
   botaoCancelar: { alignSelf: "flex-start", borderWidth: 1, borderColor: colors.red, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },
   botaoCancelarTexto: { color: colors.red, fontWeight: "600", fontSize: 12 },
-  vazioContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 40, backgroundColor: colors.bg },
+  vazioContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 40 },
   vazioTitulo: { fontSize: 17, fontWeight: "bold", marginBottom: 6, color: colors.textPrimary },
   vazioTexto: { color: colors.textSecondary, textAlign: "center" },
 });

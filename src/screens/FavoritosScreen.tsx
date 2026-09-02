@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useEventos } from "../context/EventosContext";
 import { useFavoritos } from "../context/FavoritosContext";
 import EventoCard from "../components/EventoCard";
+import MenuButton from "../components/MenuButton";
 import { colors } from "../theme/colors";
 
 export default function FavoritosScreen() {
@@ -14,9 +15,17 @@ export default function FavoritosScreen() {
 
   if (eventosFavoritos.length === 0) {
     return (
-      <View style={styles.vazioContainer}>
-        <Text style={styles.vazioTitulo}>Nenhum favorito ainda</Text>
-        <Text style={styles.vazioTexto}>Toque no coração de um evento na Início para salvá-lo aqui.</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerTopo}>
+            <MenuButton />
+            <Text style={styles.titulo}>Meus Favoritos</Text>
+          </View>
+        </View>
+        <View style={styles.vazioContainer}>
+          <Text style={styles.vazioTitulo}>Nenhum favorito ainda</Text>
+          <Text style={styles.vazioTexto}>Toque no coração de um evento na Início para salvá-lo aqui.</Text>
+        </View>
       </View>
     );
   }
@@ -24,7 +33,10 @@ export default function FavoritosScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.titulo}>Meus Favoritos</Text>
+        <View style={styles.headerTopo}>
+          <MenuButton />
+          <Text style={styles.titulo}>Meus Favoritos</Text>
+        </View>
         <Text style={styles.subtitulo}>{eventosFavoritos.length} eventos salvos</Text>
       </View>
       <FlatList
@@ -53,11 +65,12 @@ export default function FavoritosScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  header: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 12 },
+  header: { paddingTop: 50, paddingHorizontal: 16, paddingBottom: 12 },
+  headerTopo: { flexDirection: "row", alignItems: "center", gap: 8 },
   titulo: { fontSize: 22, fontWeight: "bold", color: colors.textPrimary },
-  subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2 },
+  subtitulo: { color: colors.textSecondary, fontSize: 13, marginTop: 2, marginLeft: 44 },
   lista: { gap: 12, paddingHorizontal: 16, paddingBottom: 24 },
-  vazioContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 40, backgroundColor: colors.bg },
+  vazioContainer: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 40 },
   vazioTitulo: { fontSize: 17, fontWeight: "bold", marginBottom: 6, color: colors.textPrimary },
   vazioTexto: { color: colors.textSecondary, textAlign: "center" },
 });

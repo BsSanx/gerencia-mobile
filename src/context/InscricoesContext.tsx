@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
+import { Alert } from "react-native";
+import { useNotificacoes } from "./NotificacoesContext";
 import {
   collection,
   onSnapshot,
@@ -49,16 +51,38 @@ export function InscricoesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { eventos } = useEventos();
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
+  const { adicionarNotificacao } = useNotificacoes();
+
+  const eventosRef = useRef(eventos);
+  useEffect(() => {
+    eventosRef.current = eventos;
+  }, [eventos]);
+
+  const inscricoesAnterioresRef = useRef<Inscricao[]>([]);
 
   useEffect(() => {
     if (!user) {
       setInscricoes([]);
+      inscricoesAnterioresRef.current = [];
       return;
     }
     const ref = collection(db, "inscricoes");
     const q = query(ref, where("usuarioId", "==", user.uid));
     const unsubscribe = onSnapshot(q, (snap) => {
       const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Inscricao[];
+
+      // Detecta promoção: estava "espera" e virou "confirmada" -> avisa o usuário
+      lista.forEach((atual) => {
+        const anterior = inscricoesAnterioresRef.current.find((i) => i.id === atual.id);
+        if (anterior && anterior.status === "espera" && atual.status === "confirmada") {
+          const evento = eventosRef.current.find((e) => e.id === atual.eventoId);
+          const texto = `Você foi promovido da lista de espera. Sua inscrição em "${evento?.nome ?? "um evento"}" está confirmada.`;
+          Alert.alert("Vaga liberada! 🎉", texto);
+          adicionarNotificacao(texto);
+        }
+      });
+
+      inscricoesAnterioresRef.current = lista;
       setInscricoes(lista);
     });
     return unsubscribe;
